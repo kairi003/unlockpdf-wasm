@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>unlockpdf-wasm</title>
+  <script src="script.mjs" type="module" defer></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <h1>unlockpdf-wasm</h1>
+  <p>
+    Unlock PDF files on the browser locally.
+    It uses qpdf bult with emscripten.
+  </p>
+  <p>
+    repo: <a href="https://github.com/kairi003/unlockpdf-wasm">https://github.com/kairi003/unlockpdf-wasm</a>
+  </p>
+
+  <section>
+    <h2>INPUT</h2>
+    <form id="inputForm" action="javascript:void(0)" method="post" onsubmit="return false;">
+      <p>
+        <label for="file">
+          PDF:
+          <input type="file" id="file" name="file" accept="application/pdf" required="required" />
+        </label>
+      </p>
+      <p>
+        <label for="password">
+          Password:
+          <input type="password" id="password" name="password" autocomplete="off" required="required" />
+        </label>
+      </p>
+      <p>
+        <button type="submit" id="unlock">Unlock & Download</button>
+        <a href download id="downloadLink"></a>
+      </p>
+      <div id="spinner" class="spinner"></div>
+    </form>
+  </section>
+
+  <section>
+    <h2>LOG</h2>
+    <label for="autoScroll">
+      <input type="checkbox" id="autoScroll" checked="checked" />
+      Auto Scroll
+    </label>
+    <label for="stdout">
+      <input type="checkbox" id="stdout" class="stdout-check" checked="checked" />
+      stdout
+    </label>
+    <label for="stderr">
+      <input type="checkbox" id="stderr" class="stderr-check" checked="checked" />
+      stderr
+    </label>
+    <button id="clearLog">Clear</button>
+    <ul id="logger"></ul>
+    <template id="stdoutTemplate">
+      <li class="record stdout"></li>
+    </template>
+    <template id="stderrTemplate">
+      <li class="record stderr"></li>
+    </template>
+  </section>
+</body>
+
+</html>
