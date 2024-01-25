@@ -83,3 +83,10 @@ inputForm.addEventListener('submit', async event => {
   }
   return false;
 });
+
+
+window.pqdfutils = {
+  qpdf: await qpdfPromise,
+  downloadFile,
+  printf
+}
