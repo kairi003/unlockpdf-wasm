@@ -39,10 +39,19 @@ const unlockPdf = async (data, password) => {
   if (ret !== 0) {
     throw new Error('Failed to decrypt the PDF file.');
   }
-  const outputData = qpdf.FS.readFile('/unlock/output.pdf');
-  const blob = new Blob([outputData], { type: 'application/pdf' });
+  return;
+}
+
+const downloadFile = async (filename, dstName, options) => {
+  const qpdf = await qpdfPromise;
+  const outputData = qpdf.FS.readFile(filename);
+  const blob = new Blob([outputData], options);
   const url = URL.createObjectURL(blob);
-  return url;
+  const a = document.createElement('a');
+  a.download = dstName;
+  a.href = url;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 const inputForm = document.getElementById('inputForm');
@@ -63,13 +72,9 @@ inputForm.addEventListener('submit', async event => {
 
   const spinner = document.getElementById('spinner');
   spinner.classList.add('show');
-  const downlaod = document.getElementById('downloadLink');
-  URL.revokeObjectURL(downlaod.href || '');
   try {
-    const url = await unlockPdf(data, password);
-    downlaod.href = url;
-    downlaod.download = destName;
-    downlaod.click();
+    await unlockPdf(data, password);
+    await downloadFile('/unlock/output.pdf', destName, { type: 'application/pdf' });
   } catch (e) {
     console.error(e);
     window.alert(e);

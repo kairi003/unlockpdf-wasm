@@ -41,6 +41,10 @@ body {
   word-break: break-all;
 }
 
+.record::marker {
+  font-weight: bold;
+}
+
 .record.stdout {
   list-style-type: "stdout: ";
   color: #000;
