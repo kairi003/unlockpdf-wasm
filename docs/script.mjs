@@ -85,7 +85,7 @@ inputForm.addEventListener('submit', async event => {
 });
 
 
-window.pqdfutils = {
+window.qpdfutils = {
   qpdf: await qpdfPromise,
   downloadFile,
   printf
