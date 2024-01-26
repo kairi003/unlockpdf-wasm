@@ -47,12 +47,12 @@ body {
 
 .record.stdout {
   list-style-type: "stdout: ";
-  color: #000;
+  color: black;
 }
 
 .record.stderr {
   list-style-type: "stderr: ";
-  color: #f00;
+  color: darkred;
 }
 
 label:has(.stdout-check:checked)~#logger .stdout {

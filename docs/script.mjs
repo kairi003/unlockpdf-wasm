@@ -1,6 +1,6 @@
 import QPDF from './qpdf.mjs';
 
-const printf = (msg, isError = false) => {
+const printLog = (msg, isError = false) => {
   const tmp = document.getElementById(
     isError ? 'stderrTemplate' : 'stdoutTemplate');
   const clone = tmp.content.cloneNode(true);
@@ -19,15 +19,28 @@ document.getElementById('clearLog').addEventListener('click', () => {
 });
 
 const qpdfPromise = QPDF({
-  print: msg => printf(msg, false),
-  printErr: msg => printf(msg, true),
+  print: msg => printLog(msg, false),
+  printErr: msg => printLog(msg, true),
+  downloadFile: function (filename, dstName, options) {
+    const outputData = this.FS.readFile(filename);
+    const blob = new Blob([outputData], options);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.download = dstName;
+    a.href = url;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 }).then(qpdf => {
   qpdf.FS.mkdir('/unlock');
-  console.log('QPDF loaded.');
+  globalThis.qpdf = qpdf;
+  qpdf.callMain(['--version']);
   return qpdf;
 });
 
-const unlockPdf = async (data, password) => {
+const unlockPdf = async (file, password) => {
+  const data = new Uint8Array(await file.arrayBuffer());
+  const dstName = file.name.replace(/\.pdf$/, '.decrypted.pdf');
   const qpdf = await qpdfPromise;
   qpdf.FS.writeFile('/unlock/input.pdf', data);
   const ret = qpdf.callMain([
@@ -39,19 +52,10 @@ const unlockPdf = async (data, password) => {
   if (ret !== 0) {
     throw new Error('Failed to decrypt the PDF file.');
   }
+  qpdf.downloadFile('/unlock/output.pdf', dstName, {
+    type: 'application/pdf',
+  });
   return;
-}
-
-const downloadFile = async (filename, dstName, options) => {
-  const qpdf = await qpdfPromise;
-  const outputData = qpdf.FS.readFile(filename);
-  const blob = new Blob([outputData], options);
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.download = dstName;
-  a.href = url;
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 const inputForm = document.getElementById('inputForm');
@@ -61,20 +65,13 @@ inputForm.addEventListener('submit', async event => {
   event.preventDefault();
   const file = fileInput.files[0];
   const password = passwordInput.value;
-  if (!file || !password) {
-    return false;
-  }
-  const srcName = file.name;
-  const destName = srcName.replace(/\.pdf$/, '.decrypted.pdf');
-
-  const buffer = await file.arrayBuffer();
-  const data = new Uint8Array(buffer);
-
+  if (!file || !password) return false;
   const spinner = document.getElementById('spinner');
   spinner.classList.add('show');
   try {
-    await unlockPdf(data, password);
-    await downloadFile('/unlock/output.pdf', destName, { type: 'application/pdf' });
+    printLog('Start to unlock...');
+    await unlockPdf(file, password);
+    printLog('Done.');
   } catch (e) {
     console.error(e);
     window.alert(e);
@@ -83,10 +80,3 @@ inputForm.addEventListener('submit', async event => {
   }
   return false;
 });
-
-
-window.qpdfutils = {
-  qpdf: await qpdfPromise,
-  downloadFile,
-  printf
-}
