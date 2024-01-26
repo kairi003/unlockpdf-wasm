@@ -1,10 +1,20 @@
 import QPDF from './qpdf.mjs';
 
-const printLog = (msg, isError = false) => {
-  const tmp = document.getElementById(
-    isError ? 'stderrTemplate' : 'stdoutTemplate');
+
+document.getElementById('logSwitch').addEventListener('change', event => {
+  const {target} = event;
+  const targetType = target.dataset.target;
+  document.querySelectorAll('.record.' + targetType).forEach(rec => {
+    rec.classList.toggle('hidden', !target.checked);
+  });
+});
+
+const printLog = (msg, type='system') => {
+  const tmp = document.getElementById('recordTemplate');
   const clone = tmp.content.cloneNode(true);
   const rec = clone.querySelector('.record');
+  rec.classList.add(type);
+  rec.dataset.type = type;
   rec.textContent = msg;
   const logger = document.getElementById('logger');
   logger.appendChild(clone);
@@ -19,8 +29,8 @@ document.getElementById('clearLog').addEventListener('click', () => {
 });
 
 const qpdfPromise = QPDF({
-  print: msg => printLog(msg, false),
-  printErr: msg => printLog(msg, true),
+  print: msg => printLog(msg, 'stdout'),
+  printErr: msg => printLog(msg, 'stderr'),
   downloadFile: function (filename, dstName, options) {
     const outputData = this.FS.readFile(filename);
     const blob = new Blob([outputData], options);
@@ -33,7 +43,6 @@ const qpdfPromise = QPDF({
   },
 }).then(qpdf => {
   qpdf.FS.mkdir('/unlock');
-  globalThis.qpdf = qpdf;
   qpdf.callMain(['--version']);
   return qpdf;
 });
@@ -69,9 +78,9 @@ inputForm.addEventListener('submit', async event => {
   const spinner = document.getElementById('spinner');
   spinner.classList.add('show');
   try {
-    printLog('Start to unlock...');
+    printLog('Start to unlock...', 'system');
     await unlockPdf(file, password);
-    printLog('Done.');
+    printLog('Done.', 'system');
   } catch (e) {
     console.error(e);
     window.alert(e);
@@ -80,3 +89,5 @@ inputForm.addEventListener('submit', async event => {
   }
   return false;
 });
+
+export { qpdfPromise, printLog };

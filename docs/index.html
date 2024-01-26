@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>unlockpdf-wasm</title>
   <script src="script.mjs" type="module" defer></script>
+  <script src="debug.mjs" type="module" defer></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -22,24 +23,44 @@
   <section>
     <h2>INPUT</h2>
     <form id="inputForm" action="javascript:void(0)" method="post" onsubmit="return false;">
-      <p>
-        <label for="file">
-          PDF:
-          <input type="file" id="file" name="file" accept="application/pdf" required="required" />
-        </label>
-      </p>
-      <p>
-        <label for="password">
-          Password:
-          <input type="password" id="password" name="password" autocomplete="off" required="required" />
-        </label>
-      </p>
-      <p>
-        <button type="submit" id="unlock">Unlock & Download</button>
-      </p>
-      <div id="spinner" class="spinner"></div>
+      <section class="form-section">
+        <h4><label for="file">PDF</label></h4>
+        <input type="file" id="file" name="file" accept="application/pdf" required="required" />
+      </section>
+      <section class="form-section">
+        <h4><label for="password">Password</label></h4>
+        <input type="password" id="password" name="password" autocomplete="off" required="required" />
+      </section>
+      <button type="submit" id="unlock">Unlock & Download</button>
     </form>
+
+    <details>
+      <summary>DEBUG</summary>
+      <section class="form-section">
+        <h4><label for="debugFile">Files</label></h4>
+        <input type="file" id="debugFile" name="debugFile" accept="application/pdf" multiple />
+        <button type="button" id="debugFileLoad">load</button>
+      </section>
+      <section class="form-section">
+        <h4><label for="debugCommand">Command</label></h4>
+        <select name="command" id="debugCommand">
+          <option value="callMain">qpdf</option>
+          <option value="readdir">ls</option>
+          <option value="unlink">rm</option>
+          <option value="donwloadFile">get</option>
+        </select>
+        <button type="button" id="debugParse">parse</button>
+        <button type="button" id="debugExec">exec</button>
+      </section>
+      <section class="form-section">
+        <h4><label for="debugArgs">Arguments</label></h4>
+        <textarea name="debugArgs" id="debugArgs" rows="1"></textarea>
+      </section>
+    </details>
+
+    <div id="spinner" class="spinner"></div>
   </section>
+
 
   <section>
     <h2>LOG</h2>
@@ -47,14 +68,20 @@
       <input type="checkbox" id="autoScroll" checked="checked" />
       Auto Scroll
     </label>
-    <label for="stdout">
-      <input type="checkbox" id="stdout" class="stdout-check" checked="checked" />
-      stdout
-    </label>
-    <label for="stderr">
-      <input type="checkbox" id="stderr" class="stderr-check" checked="checked" />
-      stderr
-    </label>
+    <div id="logSwitch">
+      <label for="stdoutCheck">
+        <input type="checkbox" id="stdoutCheck" class="stdout-check" checked="checked" data-target="stdout" />
+        stdout
+      </label>
+      <label for="stderrCheck">
+        <input type="checkbox" id="stderrCheck" class="stderr-check" checked="checked" data-target="stderr" />
+        stderr
+      </label>
+      <label for="systemCheck">
+        <input type="checkbox" id="systemCheck" class="system-check" checked="checked" data-target="system" />
+        system
+      </label>
+    </div>
     <button id="clearLog">Clear</button>
     <ul id="logger"></ul>
     <template id="stdoutTemplate">
@@ -62,6 +89,9 @@
     </template>
     <template id="stderrTemplate">
       <li class="record stderr"></li>
+    </template>
+    <template id="recordTemplate">
+      <li class="record"></li>
     </template>
   </section>
 </body>

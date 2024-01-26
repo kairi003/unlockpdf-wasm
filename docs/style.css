@@ -27,38 +27,48 @@ body {
 
 #logger {
   padding: 5px;
-  padding-inline-start: calc(5px + 4em);
   font-family: monospace;
+  list-style-type: none;
   height: 20em;
   border: #000 solid 1px;
   overflow-y: scroll;
   resize: vertical;
 }
 
+#logSwitch {
+  display: inline-block;
+}
+
 .record {
-  display: none;
   white-space: pre-wrap;
   word-break: break-all;
 }
 
-.record::marker {
+.record.hidden {
+  display: none;
+}
+
+.record::before {
+  content: attr(data-type) ": ";
+  display: inline-block;
+  width: 8ch;
   font-weight: bold;
 }
 
-.record.stdout {
-  list-style-type: "stdout: ";
-  color: black;
-}
-
 .record.stderr {
-  list-style-type: "stderr: ";
   color: darkred;
 }
 
-label:has(.stdout-check:checked)~#logger .stdout {
-  display: list-item;
-}
 
-label:has(.stderr-check:checked)~#logger .stderr {
-  display: list-item;
+form {
+  margin: 0.5em 0;
+}
+.form-section {
+  margin: 0.5em 0;  
+}
+.form-section h4 {
+  margin: 0;
+}
+textarea {
+  width: 100%;
 }
